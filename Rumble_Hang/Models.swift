@@ -85,7 +85,7 @@ class ArticleStore: ObservableObject {
             let newArticles = (0..<5).map { i in Article(title: "Paginated Article with a very long title that should span multiple lines \(self.paginatedArticles.count + i)", imageURL: URL(string: "https://picsum.photos/150/150?random=\(self.paginatedArticles.count + i)")) }
             self.paginatedArticles.append(contentsOf: newArticles)
             
-            if self.paginatedArticles.count > 50 {
+            if self.paginatedArticles.count > 1000 {
                 self.hasNext = false
             }
         }

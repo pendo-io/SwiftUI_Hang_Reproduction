@@ -71,19 +71,23 @@ struct ReadMoreArticles: View {
             if case .success(let articles) = articleStore.recommendedArticlesLoadingState {
                 LazyVStack(spacing: 12) {
                     ForEach(articles) { article in
-                        JuniorTeaser(article: article)
-                            .onTapGesture {
-                                selectedArticleID = article.id
-                            }
-                            .accessibilityIdentifier("articleDetail-recommended-article-\(articles.firstIndex(where: { $0.id == article.id }) ?? 0)")
+                        LazyVStack (spacing:1) {
+                            JuniorTeaser(article: article)
+                                .onTapGesture {
+                                    selectedArticleID = article.id
+                                }
+                                .accessibilityIdentifier("articleDetail-recommended-article-\(articles.firstIndex(where: { $0.id == article.id }) ?? 0)")
+                        }
                     }
                     
                     ForEach(articleStore.paginatedArticles) { article in
-                        JuniorTeaser(article: article)
-                            .onTapGesture {
-                                selectedArticleID = article.id
-                            }
-                            .accessibilityIdentifier("articleDetail-paginated-recommended-article-\(articleStore.paginatedArticles.firstIndex(where: { $0.id == article.id }) ?? 0)")
+                        LazyVStack (spacing:1) {
+                            JuniorTeaser(article: article)
+                                .onTapGesture {
+                                    selectedArticleID = article.id
+                                }
+                                .accessibilityIdentifier("articleDetail-paginated-recommended-article-\(articleStore.paginatedArticles.firstIndex(where: { $0.id == article.id }) ?? 0)")
+                        }
                     }
                 }
                 .padding(.horizontal)
