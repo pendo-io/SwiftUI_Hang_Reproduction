@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		01AB71C02F2950260070F307 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 01AB71BF2F2950260070F307 /* SDWebImageSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		01AB719C2F2942CC0070F307 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01AB71C02F2950260070F307 /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = Rumble_Hang;
 			packageProductDependencies = (
+				01AB71BF2F2950260070F307 /* SDWebImageSwiftUI */,
 			);
 			productName = Rumble_Hang;
 			productReference = 01AB718E2F2942CA0070F307 /* Rumble_Hang.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 01AB71852F2942CA0070F307;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				01AB71BE2F2950260070F307 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 01AB718F2F2942CA0070F307 /* Products */;
 			projectDirPath = "";
@@ -578,6 +587,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		01AB71BE2F2950260070F307 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		01AB71BF2F2950260070F307 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01AB71BE2F2950260070F307 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 01AB71862F2942CA0070F307 /* Project object */;
 }
