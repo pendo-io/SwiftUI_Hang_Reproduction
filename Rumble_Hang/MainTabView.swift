@@ -74,6 +74,21 @@ struct ArticleListView: View {
     
     var body: some View {
         List {
+            // Special test case at the top
+            NavigationLink(destination: NestedLazyVStackView()) {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    VStack(alignment: .leading) {
+                        Text("Nested LazyVStack Test")
+                            .font(.headline)
+                        Text("Reproduces hang with Accessibility")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            
             ForEach(articles) { article in
                 NavigationLink(destination: ArticleDetailView(article: article)) {
                     ArticleRowView(article: article)

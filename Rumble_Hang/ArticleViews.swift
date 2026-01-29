@@ -71,23 +71,19 @@ struct ReadMoreArticles: View {
             if case .success(let articles) = articleStore.recommendedArticlesLoadingState {
                 LazyVStack(spacing: 12) {
                     ForEach(articles) { article in
-                        LazyVStack (spacing:1) {
-                            JuniorTeaser(article: article)
-                                .onTapGesture {
-                                    selectedArticleID = article.id
-                                }
-                                .accessibilityIdentifier("articleDetail-recommended-article-\(articles.firstIndex(where: { $0.id == article.id }) ?? 0)")
-                        }
+                        LazyVStackWrapper1(
+                            article: article,
+                            onTap: { selectedArticleID = article.id },
+                            accessibilityId: "articleDetail-recommended-article-\(articles.firstIndex(where: { $0.id == article.id }) ?? 0)"
+                        )
                     }
                     
                     ForEach(articleStore.paginatedArticles) { article in
-                        LazyVStack (spacing:1) {
-                            JuniorTeaser(article: article)
-                                .onTapGesture {
-                                    selectedArticleID = article.id
-                                }
-                                .accessibilityIdentifier("articleDetail-paginated-recommended-article-\(articleStore.paginatedArticles.firstIndex(where: { $0.id == article.id }) ?? 0)")
-                        }
+                        LazyVStackWrapper1(
+                            article: article,
+                            onTap: { selectedArticleID = article.id },
+                            accessibilityId: "articleDetail-paginated-recommended-article-\(articleStore.paginatedArticles.firstIndex(where: { $0.id == article.id }) ?? 0)"
+                        )
                     }
                 }
                 .padding(.horizontal)
@@ -223,5 +219,129 @@ struct JuniorTeaser: View {
 struct MiniPlayerSpacer: View {
     var body: some View {
         Spacer().frame(height: 50)
+    }
+}
+
+// MARK: - Nested LazyVStack Wrappers (for stress testing)
+
+struct LazyVStackWrapper1: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper2(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper2: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper3(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper3: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper4(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper4: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper5(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper5: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper6(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper6: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper7(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper7: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper8(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper8: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper9(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper9: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            LazyVStackWrapper10(article: article, onTap: onTap, accessibilityId: accessibilityId)
+        }
+    }
+}
+
+struct LazyVStackWrapper10: View {
+    let article: Article
+    let onTap: () -> Void
+    let accessibilityId: String
+    
+    var body: some View {
+        LazyVStack(spacing: 1) {
+            JuniorTeaser(article: article)
+                .onTapGesture(perform: onTap)
+                .accessibilityIdentifier(accessibilityId)
+        }
     }
 }
