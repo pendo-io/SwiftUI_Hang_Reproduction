@@ -20,11 +20,15 @@ struct NestedLazyVStackView: View {
     
     var body: some View {
         ScrollView {
+            // OUTER LazyVStack - Level 1
             LazyVStack(alignment: .leading, spacing: 24) {
                 ForEach(outerSections, id: \.self) { section in
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Section #\(section)")
                             .font(.headline)
+                        
+                        // INNER LazyVStack - Level 2 (NESTED!)
+                        // ⚠️ HANG OCCURS when Accessibility Inspector scans this nested lazy container
                         LazyVStack(alignment: .leading, spacing: 2) {
                             ForEach(innerRows[section] ?? [], id: \.self) { row in
                                 Text("Section #\(section) - Row #\(row)")
@@ -34,6 +38,10 @@ struct NestedLazyVStackView: View {
                                     .background(Color(.secondarySystemBackground))
                                     .cornerRadius(6)
                                     .onAppear {
+                                        // ⚠️ HANG TRIGGER POINT:
+                                        // When this callback fires while Accessibility Inspector is scanning,
+                                        // it triggers loadMoreInner() which adds new views to the LazyVStack
+                                        // while the accessibility system is traversing it
                                         if let rows = innerRows[section],
                                            row == rows.last, !(isInnerLoading[section] ?? false), rows.count < innerMax {
                                             loadMoreInner(section: section)
@@ -47,6 +55,9 @@ struct NestedLazyVStackView: View {
                     }
                     .padding(.bottom, 10)
                     .onAppear {
+                        // ⚠️ HANG TRIGGER POINT:
+                        // When this outer .onAppear fires while Accessibility Inspector is scanning,
+                        // it adds new sections which creates more nested LazyVStacks
                         if section == outerSections.last, !isOuterLoading, outerSections.count < outerMax {
                             loadMoreOuter()
                         }

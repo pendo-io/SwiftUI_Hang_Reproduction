@@ -2,43 +2,84 @@
 
 ## Purpose
 
-This project is designed to test for **potential hang/crash issues** in SwiftUI applications when using:
+This project reproduces a **hang issue** in SwiftUI applications when using:
 - **Accessibility Inspector** (iOS Simulator)
 - **VoiceOver** (Physical iOS Device)
 
-The project replicates a specific SwiftUI view hierarchy pattern involving nested `LazyVStack` components with dynamic content that may exhibit issues under certain conditions.
+The hang occurs with a specific SwiftUI view hierarchy pattern involving nested `LazyVStack` components with dynamic content loading.
 
 ---
 
-## The Pattern
+## Quick Reproduction Steps
 
-### View Structure
-This project uses a nested `LazyVStack` pattern that has been reported to potentially cause issues:
+
+### Steps to Reproduce the Hang
+
+1. **Build and run** the project in the iOS Simulator
+2. **Enable Accessibility Inspector**:
+   - Xcode → Open Developer Tool → Accessibility Inspector
+   - Select your running simulator
+   - Click the **Inspection** (eye) icon to enable it
+3. **Navigate to the test view**:
+   - In the app, tap **"Show Nested LazyVStack Page"**
+4. **Trigger the hang**:
+   - Start scrolling down through the list
+   - The app will become **unresponsive** and hang
+   - The hang typically occurs when scrolling triggers new sections to load
+
+### Where the Hang Occurs
+
+The hang happens in **`NestedLazyVStackView.swift`** during scrolling:
 
 ```swift
 ScrollView {
-    LazyVStack {                    // Level 1: Outer lazy container
-        ArticleHeader(...)
-        ArticleContent(...)
-        
-        ReadMoreArticles {
-            LazyVStack {            // Level 2: Inner lazy container (NESTED!)
-                ForEach(articles) { article in
-                    JuniorTeaser(...)  // Dynamically created/destroyed views
+    LazyVStack {                              // Outer LazyVStack
+        ForEach(outerSections) { section in
+            VStack {
+                Text("Section #\(section)")
+                LazyVStack {                  // Inner LazyVStack (NESTED!)
+                    ForEach(innerRows) { row in
+                        Text("Row #\(row)")
+                            .onAppear {       // ← HANG OCCURS HERE
+                                loadMoreInner() // When this triggers with Accessibility active
+                            }
+                    }
                 }
+            }
+            .onAppear {                       // ← OR HERE
+                loadMoreOuter()               // When this triggers
             }
         }
     }
 }
 ```
 
-This pattern is found in `ArticleViews.swift` → `ArticleDetailView` → `ReadMoreArticles`.
+---
 
-### Why This Pattern Matters
+## The Pattern
 
-1. **Dynamic View Lifecycle**: `LazyVStack` creates views on-demand and destroys them when off-screen
-2. **Accessibility Scanning**: VoiceOver and Accessibility Inspector perform deep view hierarchy traversals
-3. **Timing Sensitivity**: The combination of dynamic view lifecycle + accessibility scanning may expose edge cases
+### View Structure
+The critical pattern that causes the hang:
+
+```swift
+ScrollView {
+    LazyVStack {                    // Level 1: Outer lazy container
+        ForEach(...) { section in
+            VStack {
+                LazyVStack {        // Level 2: Inner lazy container (NESTED!)
+                    ForEach(...) { row in
+                        Text(...)
+                            .onAppear { ... }  // Dynamic loading
+                    }
+                }
+            }
+            .onAppear { ... }  // Dynamic loading
+        }
+    }
+}
+```
+
+This pattern is found in **`NestedLazyVStackView.swift`**.
 
 ---
 
@@ -46,107 +87,89 @@ This pattern is found in `ArticleViews.swift` → `ArticleDetailView` → `ReadM
 
 ### Key Files
 
-- **Models.swift** - Article data models and stores
-- **ArticleViews.swift** - Main article view with **nested LazyVStack** (the reproduction case)
-- **MainTabView.swift** - Tab bar navigation structure
-- **ContentView.swift** - Root view
+- **ContentView.swift** - Root view with simple navigation (tap "Show Nested LazyVStack Page")
+- **NestedLazyVStackView.swift** - **THE REPRODUCTION CASE** - Contains nested LazyVStack with infinite scroll
+- **AppDelegate.swift** - Application lifecycle methods
+- **Models.swift** - Article data models (not used in reproduction)
+- **ArticleViews.swift** - Alternative reproduction case (not used in primary test)
+- **MainTabView.swift** - Tab bar structure (not used in primary test)
 
 ### Dependencies
 
-- **iOS**: 14.0+
-- **SDWebImageSwiftUI**: 2.2.7 (for image loading)
+- **SDWebImageSwiftUI**: 2.2.7
 
----
-
-## How to Test
-
-### Testing with Accessibility Inspector (Simulator)
-
-1. **Build and run** the project in the iOS Simulator
-2. **Enable Accessibility Inspector**:
-   - Xcode → Open Developer Tool → Accessibility Inspector
-   - Select your running simulator
-   - Turn on Inspection mode
-3. **Navigate to an article**:
-   - Tap the first tab ("Startseite")
-   - Tap any article from the list
-4. **Interact with dynamic content**:
-   - Scroll down to the "Recommended Articles" section
-   - Tap the "Mehr" (More) button to load additional articles
-   - Continue scrolling through the list
-5. **Observe**: Monitor for any responsiveness issues or hangs
-
-### Testing with VoiceOver (Physical Device)
-
-1. **Build and run** the project on a physical iOS device
-2. **Enable VoiceOver**:
-   - Settings → Accessibility → VoiceOver → On
-   - Or use the Accessibility Shortcut (triple-click side button)
-3. **Navigate to an article**:
-   - Swipe to navigate to the first tab
-   - Select an article
-4. **Interact with dynamic content**:
-   - Swipe down to the "Recommended Articles" section
-   - Activate the "Mehr" button to load more articles
-   - Swipe through the article cards
-5. **Observe**: Monitor for any crashes or hangs
-
----
-
-## Expected Behavior
-
-The app should:
-- Remain responsive when Accessibility Inspector or VoiceOver is enabled
-- Handle scrolling and dynamic content loading smoothly
-- Allow accessibility features to traverse the view hierarchy without conflicts
-
----
-
-## Alternative Implementation
-
-If issues are encountered, the nested `LazyVStack` can be replaced with `VStack`:
-
-```swift
-// Current Implementation
-LazyVStack {
-    ReadMoreArticles {
-        LazyVStack {  // ← Nested lazy container
-            ForEach(articles) { ... }
-        }
-    }
-}
-
-// Alternative Implementation
-LazyVStack {
-    ReadMoreArticles {
-        VStack {      // ← Changed to eager container
-            ForEach(articles) { ... }
-        }
-    }
-}
-```
-
-This eliminates the dynamic view lifecycle but sacrifices some performance benefits of lazy loading.
+**Note:** This project does not include any third-party SDKs. The hang is a pure SwiftUI + Accessibility issue.
 
 ---
 
 ## Build & Run
 
 1. Open `Rumble_Hang.xcodeproj` in Xcode
-2. Select a simulator or physical device
-3. Build and run the project
-4. Follow the testing steps above
+2. Select a simulator (iPhone 15 or later recommended, I have  reproduce on ios 26.2)
+3. Build and run (⌘R)
+4. Follow the "Quick Reproduction Steps" above
+
+---
+
+## Workarounds
+
+If the hang occurs in your application, there are two known workarounds:
+
+### Option 1: Replace Nested LazyVStack with VStack
+
+```swift
+// BEFORE (causes hang)
+LazyVStack {
+    ForEach(...) { section in
+        LazyVStack {  // ← Inner nested lazy
+            ForEach(...) { row in
+                ...
+            }
+        }
+    }
+}
+
+// AFTER (resolves hang)
+LazyVStack {
+    ForEach(...) { section in
+        VStack {      // ← Changed to eager container
+            ForEach(...) { row in
+                ...
+            }
+        }
+    }
+}
+```
+
+This eliminates the nested lazy behavior and prevents the hang.
+
+### Option 2: Wrap in TabView
+
+**Interesting finding:** The hang does **not** occur when the view is embedded within a `TabView`:
+
+```swift
+TabView {
+    NavigationStack {
+        // Your view with nested LazyVStack
+        NestedLazyVStackView()
+    }
+    .tabItem { ... }
+}
+```
+
+The TabView appears to isolate or buffer the nested LazyVStack from the accessibility system in a way that prevents the hang. This workaround maintains the lazy loading behavior while avoiding the conflict.
 
 ---
 
 ## Customer Context
 
-This reproduction project is based on real customer code from the **Rumble iOS App** (News reading application), where a similar view hierarchy pattern was used.
+This reproduction project is based on real customer code from the **Rumble iOS App** (News reading application), where a similar view hierarchy pattern was used. The hang was reported when users enabled VoiceOver or when testing with Accessibility Inspector.
 
 ---
 
 ## Notes
 
-- The project uses SDWebImageSwiftUI for image loading to match the original customer implementation
-- The tab bar structure mimics the original app's navigation pattern
-- Article data is mocked for testing purposes
+- This is a pure **SwiftUI + Accessibility** issue, not related to any third-party SDK
+- Only reported by a small number of customers in specific scenarios
+- The exact root cause is still under investigation
+- The workarounds (replacing nested `LazyVStack` with `VStack`, or using `TabView`) have been validated

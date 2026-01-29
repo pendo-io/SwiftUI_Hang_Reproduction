@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     var body: some View {
-//        MainTabView()
+//        MainTabView() ---> The Hang does not happen if we embed the same content in TabView
         NavigationStack {
             VStack(spacing: 20) {
                 Image(systemName: "globe")
