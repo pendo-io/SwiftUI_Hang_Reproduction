@@ -4,10 +4,7 @@
 //
 //  Created by Michael Rozenblat on 27/01/2026.
 //
-
 import SwiftUI
-import SDWebImageSwiftUI
-
 struct MainTabView: View {
     @State private var selectedTab = 0
     
@@ -88,68 +85,11 @@ struct ArticleListView: View {
                     }
                 }
             }
-            
-            ForEach(articles) { article in
-                NavigationLink(destination: ArticleDetailView(article: article)) {
-                    ArticleRowView(article: article)
-                }
-            }
         }
         .navigationTitle("Startseite")
-        .onAppear {
-            loadArticles()
-        }
-    }
-    
-    private func loadArticles() {
-        // Generate sample articles for the list
-        articles = (0..<10).map { i in
-            Article(
-                title: "Article \(i + 1): Pfarrer Thomas Roddey ist Polizeiseelsorger",
-                isTrialArticle: i == 0,
-                content: [
-                    .heading("Introduction"),
-                    .paragraph("This is the main article content. It is long enough to push the recommended articles down."),
-                    .paragraph("More text here to fill space."),
-                    .image(URL(string: "https://picsum.photos/300/200?random=\(i)")!),
-                    .paragraph("Conclusion text.")
-                ],
-                imageURL: URL(string: "https://picsum.photos/150/150?random=\(i)")
-            )
-        }
+        .onAppear {}
     }
 }
-
-struct ArticleRowView: View {
-    let article: Article
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            if let url = article.imageURL {
-                WebImage(url: url)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 60, height: 60)
-                    .cornerRadius(8)
-                    .clipped()
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(article.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                
-                if article.isTrialArticle {
-                    Text("Trial Article")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}
-
 // MARK: - Placeholder Views for Other Tabs
 
 struct PlaceholderTabView: View {
